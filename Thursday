@@ -1,0 +1,126 @@
+study <- function() {
+        
+        
+        activityData <- read.csv("./activity.csv")
+        
+        daily <- summarise(group_by(activityData, date,interval,steps))
+        colnames(daily) <- c("date", "interval","steps")
+        
+        original_df <- daily
+        #BEGINING
+        nrNAs <- length(is.na(daily))
+        
+        noNAs <- !is.na(daily[,"steps"])
+        
+        daily <- daily[noNAs,]
+        
+        total_steps_by_day <- summarise( group_by(daily,date), sum(steps))
+        daily_avg <- summarise( group_by(daily,date), mean(steps))
+        colnames(total_steps_by_day) <- c("date", "steps")
+        #total_steps_by_day
+        
+        days <- as.POSIXct(total_steps_by_day$date, format = '%Y-%m-%d')
+        
+        #hist(total_steps_by_day$steps, col = "red")  #plot histogram
+        
+        avg_steps_day <- mean(total_steps_by_day$steps)
+        
+        median_steps_day <- median(total_steps_by_day$steps)
+        
+        #print(avg_steps_day)
+        #print(median_steps_day)
+        
+        
+        #total_steps_by_day
+        
+        interval_avg <- summarise(group_by(daily,interval), mean(steps))
+        colnames(interval_avg) <- c("interval","steps")
+        #plot(interval_avg$interval,as.numeric(interval_avg$steps), type = "l")
+        incompleteCases <- original_df[!complete.cases(original_df),]
+        
+        missingValues <- nrow(incompleteCases)
+        
+        
+        
+        
+        
+        
+        print(interval_avg)
+        message("--------------------------------")
+        print(incompleteCases)
+        
+        
+        incompleteCases[,"steps"]<-interval_avg$steps
+        
+        incompleteCases #works, now merge incompleteCases with the daily dataset and check for NAs and if the dataset is complete
+        
+        print(nrow(original_df))
+        print(nrow(daily))
+        print(nrow(incompleteCases)) #nr of values that were missing(and are currently in this df)
+        
+        
+        
+        complete_df <- rbind(daily,incompleteCases)  #original dataset without missing values + values that were missing
+        print(nrow(complete_df))  #num rows of complete df
+        
+        complete_df <- summarise(group_by(complete_df,date,interval,steps))  #dataset equal to the original but with the missing data filled in
+        
+        complete_df_daily_steps <- summarise(group_by(complete_df,date),sum(steps))
+        colnames(complete_df_daily_steps) <- c("date","steps")
+        
+        hist(complete_df_daily_steps$steps, col = "red")
+        
+        complete_df_avg_steps_day <- mean(complete_df_daily_steps$steps) # mean of the total nr of steps per day
+        
+        complete_df_median_steps_day <- median(complete_df_daily_steps$steps) # median of the total nr of steps per day
+        
+        #nrow(complete_df[!complete.cases(complete_df),]) nr of incomplete cases in complete_df
+        
+        complete_df$weekday <-weekdays(as.Date(complete_df$date, format = '%Y-%m-%d'))
+        
+       # complete_df$weekend <- factor(c("weekday", "weekend"), levels = c("weekday", "weekend"))
+        
+        complete_df$dayOfWeek <- "Weekday"
+        #complete_df$dayOfWeek[!complete_df$weekday %in% c("Saturday","Sunday")] <- "False"
+        complete_df$dayOfWeek[complete_df$weekday %in% c("Saturday","Sunday")] <- "Weekend"
+        complete_df$dayOfWeek <- as.factor(complete_df$dayOfWeek)
+        complete_df
+        
+        #NEED TO SUMMARISE COMPLETE_DF BUUTTT TAKING INTO CONSIDERATION WEEKDAYS AND WEEKENDS
+        #summarise(group_by(p,interval,dayOfWeek),mean(steps))  LIKE THIS MAYBE
+        
+        # ggplot(p, aes(interval,steps)) + geom_line() +facet_grid(dayOfWeek~.) + geom_smooth()
+
+        
+        
+        #interval_avg
+        #END
+        #interval 835 has the highest average of steps
+        
+        
+        
+        #days
+        #interval average steps
+        #interval_avg_steps <- summarise(group_by(steps_by_day,interval), mean(steps))
+        #colnames(interval_avg_steps) <- c("interval","steps")
+        
+        #interval_avg_steps
+        
+        #max(interval_avg_steps$steps)
+        #days <- as.POSIXct(steps_by_day$date, format = '%Y/%m/%d')
+        
+       # days
+        #png("./g1.png")
+        
+        #plot(days,total_steps_by_day$steps, type = "l")
+        #dev.off()
+        
+        #steps_by_day
+        
+      #  stepsMean <- mean(steps_by_day$steps)
+        
+      #  stepsMedian <- median(steps_by_day$steps)
+        
+            
+        
+}
