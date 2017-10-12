@@ -1,0 +1,31 @@
+na_count <- sapply(ob2NA, function(y) sum(is.na(y)))
+
+
+ob_ <- ob2[,na_count !=0]
+
+datset <- rbind(traindatNA[,-160],testdatNA[,-160])
+> datpre <- preProcess(datset, method = c("nzv","zv","corr"))
+> datset1 <- predict(datpre,datset)
+> anyNA(datset1)
+na_count <- sapply(datset, function(y) sum(is.na(y)))
+datset1 <- datset[,(na_count/nrow(datset)) < 0.75]
+sans_test <- datset1[-c(1623:1642),]
+anyNA(sans_test)
+
+sans_test$classe <- traindatNA[,160]
+> datpre__ <- preProcess(sans_test, method = c("nzv","zv","corr"))
+> datpre__ <- preProcess(sans_test[,-160], method = c("nzv","zv","corr"))
+> pred_sans <- predict(datpre__,sans_test)
+
+> pred_sans <- pred_sans[,-3:6]
+finaltest <- datset1[19623:19642,]
+
+model <- train(classe ~ ., data = pred_sans, method= "lda")
+
+train_resultado <- predict(model,pred_sans)
+confusionMatrix(train_resultado,pred_sans[,"classe"])
+
+model_rpart <- train(classe ~ ., data = pred_sans, method= "rpart")
+confusionMatrix(predict(model_rpart,pred_sans),pred_sans[,"classe"])
+
+#run rf and nb models
