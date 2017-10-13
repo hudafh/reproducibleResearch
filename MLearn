@@ -29,3 +29,56 @@ model_rpart <- train(classe ~ ., data = pred_sans, method= "rpart")
 confusionMatrix(predict(model_rpart,pred_sans),pred_sans[,"classe"])
 
 #run rf and nb models
+
+
+------Friday Oct 13th -------
+
+datset2 <- datset[,(na_count/nrow(datset)) < 0.9]
+> anyNA(datset2)
+
+> sans_test2 <- datset2[-c(1623:1642),]
+> anyNA(datset2)
+
+> tail(colnames(sans_test2))
+
+> sans_test2$classe <- traindatNA[,160]
+> nzv <- nearZeroVar(sans_test2)
+> head(nzv)
+
+
+> sans_test2 <- sans_test2[,-nzv]
+> sans_test2 <- predict(preProcess(sans_test2[-59], method = "corr"),sans_test2)
+
+  
+> sans_test2 <- sans_test2[,-c(1:5)]
+> ldamod <- train(classe ~ ., data = sans_test2, method="lda")
+> confusionMatrix(predict(ldamod,sans_test2),sans_test2[,"classe"])
+
+> finaltest2 <- datset2[19623:19642,]
+> View(datset2)
+> View(finaltest2)
+> View(testdatNA)
+> testdatNA[,"problem_id"]
+
+predict(ldamod,finaltest2)
+
+ rpartmod <- train(classe ~ ., data = sans_test2, method="rpart")
+ 
+ 
+  - so far lda is better than rpart; but it's still not enough to pass
+  - Try combining them or boosting
+  
+  
+  2  A
+  3  B
+  4  A
+  5  A
+  7  D
+  9  A
+  10 A
+  14 A
+  15 E
+  17 A
+  18 B
+  19 B
+  20 B
