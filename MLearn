@@ -82,3 +82,29 @@ predict(ldamod,finaltest2)
   18 B
   19 B
   20 B
+  
+   The goal of this assignment is to predict the manner in which an exercise was performed. For that we need to make sure that the training and test sets have some common rules, i.e., perform some data cleaning.
+ 
+   Our first task will be to join the training and test and remove columns with mostly zero-values and near-zero values. Then we will remove all columns where 90% of their values are NAs. 
+   
+   Now we have a data set w/out columns composed of near-zero values, zero-values, and NA, which makes us ready to split the dataframe back into training and a test dataset.
+   
+   On the train df, it is imperative to do some variable selection in order to get rid of some of the noise of variables that have nothing to do with the outcome. Some of these variables are: X, user_name, the timestamps(3).
+   
+   We consider our training set clean enough for a fair shot at modeling and accurate predictions.
+   Four types of model will be created and applied on the train set and then on the test set: lda, rpart, a combination of the previous two, and radomForrest.
+   
+  (lda modeling, prediction on train data and then test data)
+  (rpart modeling, prediction on train data and then test data)
+  
+  So far we can see that lda performs better than rpart, however it still isn't accurate enough. We'll try combininig them to see if it gets more accurate.
+  
+  (gam_of_lda_rpart modeling, prediction on train data and then test data)
+  
+  As we can see, even combining lda and rpart is not enough for a good prediction. We'll now try randomForrests (it is the last to be tried due to it being more computationally demanding)
+  
+  we will apply a couple of tweaks to randomForrests in order to make it less computationally demanding.(EXPLAIN TWEAKS LIVE CV ON RANDOMFORREST)
+  
+  (model and predict using rf)
+  (explain results)
+  (make a statement about the expected out of sample error)
