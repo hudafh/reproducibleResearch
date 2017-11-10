@@ -108,3 +108,138 @@ predict(ldamod,finaltest2)
   (model and predict using rf)
   (explain results)
   (make a statement about the expected out of sample error)
+
+  FRIDAY NOV 10TH
+  
+  ---
+title: "Exercise Manner Prediction"
+author: "Hugo Barros"
+date: "November 10, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+ The goal of this assignment is to predict the manner in which an exercise was performed.
+ 
+ For that, we need to make sure that the training and test sets have some common rules, i.e., perform some data cleaning.
+ 
+   We have a training and a test dataset. So our first task will be to read the two datasets(treating empty cells as NAs), and join them, without the last column of each (because they are different and also because they're not meant to go through data cleaning) into one dataframe.
+
+```{r cars}
+
+suppressPackageStartupMessages(library(randomForest))
+suppressPackageStartupMessages(library(doParallel))
+suppressPackageStartupMessages(library(caret))
+
+traindat <- read.csv("c:/Users/Dafh/Documents/R/Work/Machine Learning/trainDat.csv", na.strings = c("",NA))
+
+testdat <- read.csv("c:/Users/Dafh/Documents/R/Work/Machine Learning/testDat.csv", na.strings = c("",NA))
+
+joint <- rbind(traindat[,-160], testdat[,-160])
+
+```
+
+   
+   
+   Now we will remove columns with only zero-values, near-zero values those where 90% or more of their values are NAs. 
+   
+```{r}
+pre_joint <- preProcess(joint,method = c("zv","corr"))
+joint1 <- predict(pre_joint,joint)
+anyNA(joint1)
+
+
+na_count <- sapply(joint1, function(y) sum(is.na(y)))
+
+zeroNA <- joint1[,(na_count/nrow(joint1)) < 0.90]
+
+```
+   Now we have a dataframe w/out columns composed of only near-zero values,or zero-values, or NAs, which makes us ready to split the dataframe back into a training and a test datasets.
+   We will also add the last column of training data(classe) that we removed when we joined the two datasets
+   
+```{r}
+trClean <- zeroNA[1:19622,]
+testClean <- zeroNA[19623:19642,]
+trClean$classe <- traindat$classe
+
+```
+  
+   On the train dataframe, it is imperative to do some variable selection in order to get rid of some of the noise of variables that are not likely to have an impact on the outcome. Some of these variables are: X, user_name, the timestamps(all three of them).
+   
+```{r}   
+trClean <- trClean[,-c(1:6)]
+```
+   
+   We consider our training set clean enough for a fair shot at modeling and accurate predictions.
+   
+   Four types of model will be created and applied on the train set and then on the test set: lda, rpart, a combination of the previous two, and radomForrest.
+   
+  (lda modeling, prediction on train data and then test data)
+```{r }  
+ tail(colnames(trClean)) 
+#head(trClean[,"classe"])
+ldamod <- train(classe ~ ., data = trClean, method="lda")
+confusionMatrix(predict(ldamod,trClean),trClean[,46])$overall[1]
+```
+ 
+ 
+ 
+(rpart modeling, prediction on train data and then test data)
+```{r }
+rpartmod <- train(classe ~ ., data = trClean, method="rpart")
+confusionMatrix(predict(rpartmod,trClean),trClean[,"classe"])$overall[1]
+
+```
+
+   As far as accuracy on the train data, lda is more accurate than rpart.Still, both models are not very accurate even on the data where it was trained. However, that does not mean it won't perform better on the test data.
+
+  
+  We will now try both models on the test data.
+  
+  Let's now try it on the test data:
+  
+  LDA:
+```{r}
+  lda_test_prediction <- predict(ldamod,testClean)
+  lda_test_prediction
+```
+RPART:
+```{r}
+  lda_test_prediction <- predict(ldamod,testClean)
+  lda_test_prediction
+```
+
+
+  So far we can see that lda performs better than rpart, however it still isn't accurate enough. We'll try combininig them to see if it gets more accurate.
+  
+  (gam_of_lda_rpart modeling, prediction on train data and then test data)
+  
+  As we can see, even combining lda and rpart is not enough for a good prediction. We'll now try randomForrests (it is the last to be tried due to it being more computationally demanding)
+  
+  we will apply a couple of tweaks to randomForrests in order to make it less computationally demanding.(EXPLAIN TWEAKS LIVE CV ON RANDOMFORREST)
+  
+  (model and predict using rf)
+  (explain results)
+  (make a statement about the expected out of sample error)
+
+--------------------------MORE BELOW--------------------------
+
+my_cluster <- makeCluster(detectCores()-1)
+
+registerDoParallel(my_cluster)
+fitControl <- trainControl(method = "cv", number = 10, allowParallel = TRUE)
+x <- trClean[,-46]
+y <- trClean[,46]
+fit <- train(x,y,method = "rf", data=trClean,trControl = fitControl)
+predict(fit,testClean)
+
+----------------------------------------------------------------------------------------------------------
+
+
+
+
