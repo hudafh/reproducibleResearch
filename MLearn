@@ -242,4 +242,39 @@ predict(fit,testClean)
 
 
 
+DATA PRODUCTS WEEK 2
+
+---
+title: "Luanda/Angola - Culture/Food/fun"
+author: "Hugo Barros"
+date: "November 10, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(googleVis)
+library(leaflet)
+library(dplyr)
+```
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+luandaLatLong <- data.frame( longitude = c(13.238299, 13.223020, 13.227774, 13.233390, 13.254104, 13.258368, 13.225311, 13.235025,
+                                     13.222916, 13.230295, 13.234420, 13.225522),
+                             latitude = c(-8.815075, -8.808102, -8.813558, -8.810624, -8.768558, -8.765717, -8.796232, -8.814222,
+                                     -8.799479, -8.814573, -8.815032, -8.795400 ),
+                              col = c( rep("green",4), rep("red",4), rep("blue",4)), stringsAsFactors = FALSE)
+
+siteNames <- c("Museu de Historia Natural", "Fortaleza S. Miguel", "Museu de Antropologia", "Museu da Moeda", "Chillout","Players","Bay Inn","Switch",
+               "Jango Veleiro", "Kitanda da Esquina", "Asia Lounge", "Cais de 4")
+
+
+luandaLatLong %>% leaflet() %>% addTiles() %>% addCircleMarkers(color=luandaLatLong$col,  popup=siteNames, label = siteNames) %>% 
+        addLegend(labels = c("Museum", "Club", "Restaurant"), colors = c("green","red","blue"))
+
+```
+
 
